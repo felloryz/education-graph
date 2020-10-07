@@ -23,7 +23,6 @@ void print_to_file(node_t* head, FILE* file) {
         fprintf(file, "%d;\n", head->vertice2);
         head = head->next;
     }
-    printf("\n");
     fprintf(file, "}");
 }
 
@@ -36,6 +35,7 @@ void add_edges(node_t** head) {
         int j = 0;
         int m = 1;
         int k, f;
+
         /* СЧИТЫВАНИЕ ИЗ КОНСОЛИ*/
         char str[7];
         while((c = getchar()) != '\n') {
@@ -78,6 +78,64 @@ void add_edges(node_t** head) {
     }
 }
 
+int vertice_counter(node_t* head) {
+    int n = 0;
+    while(head != NULL) {
+        n++;
+        head = head->next;
+    }
+    return n;
+}
+
+int edge_counter(node_t* head) {
+    int n = 0;
+    node_t* tmp = head;
+    while(head != NULL) {
+        n++;
+        head = head->next;
+    }
+    //printf("n = %d\n", n);
+
+    int arr[n*2];
+    for(int i = 0; i < n*2; i = i + 2) {
+        arr[i] = tmp->vertice1;
+        arr[i+1] = tmp->vertice2;
+        tmp = tmp->next;
+    }
+
+    /*for(int i = 0; i < n*2; i++) {
+        printf("%d ", arr[i]);
+    }*/
+
+    for(int i = 0; i < n*2 - 1; i++) {
+        for(int j = i + 1; j < n*2; j++) {
+            if(arr[i] != -1 && arr[i] == arr[j]) {
+                arr[j] = -1;
+            }
+        }
+    }
+
+    //printf("\n");
+    /*for(int i = 0; i < n*2; i++) {
+        printf("%d ", arr[i]);
+    }*/
+
+    int k = 0;
+    for(int i = 0; i < n*2; i++) {
+        if(arr[i] != -1) k++;
+    }
+    //printf("\n");
+    //printf("%d", k);
+
+    return k;
+}
+
+int connectivity_check(int e, int v) {
+    if(v > (e-1)*(e-2)*0.5) {
+        return 1;
+    } else return -1;
+}
+
 int main(void)
 {
     node_t* head = NULL;
@@ -97,6 +155,11 @@ int main(void)
     print_to_file(head, file);
 
     fclose(file);
+
+    if (connectivity_check(edge_counter(head), vertice_counter(head)) == 1)
+        printf("OK");
+    else
+        printf("not OK");
 
     system("dot -Tpng graph.dot -o graph.png");
     system("graph.png");
