@@ -19,8 +19,12 @@ void push(node_t** head, int vertice1, int vertice2) {
 void print_to_file(node_t* head, FILE* file) {
     fprintf(file, "graph graphname {\n");
     while(head != NULL) {
-        fprintf(file, "%d -- ", head->vertice1);
-        fprintf(file, "%d;\n", head->vertice2);
+        fprintf(file, "%d", head->vertice1);
+        if(head->vertice2 != 0) {
+            fprintf(file, " -- ");
+            fprintf(file, "%d", head->vertice2);
+        }
+        fprintf(file, ";\n");
         head = head->next;
     }
     fprintf(file, "}");
