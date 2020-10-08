@@ -84,7 +84,7 @@ void add_edges(node_t** head) {
     }
 }
 
-/* ПРОВЕРКА НА ПЕТЕЛИ */
+/* ПРОВЕРКА НА ПЕТЛИ */
 int loops_counter(node_t* head) {
     int l = 0;
     while(head != NULL) {
@@ -178,15 +178,12 @@ int vertice_counter(node_t* head) {
     for(int i = 0; i < n*2; i++) {
         if(arr[i] != -1 && arr[i] != 0) k++;
     }
-    //printf("\n");
     //printf("vershiny = %d\n", k);
-
     return k;
 }
 
 /* ПРОВЕРКА НА СВЯЗНОСТЬ */
 int connectivity_check(int v, int e, node_t* head) {
-    
     if(loops_counter(head) || multiple_edges_counter(head) != 0) {
         return -2;
     } else if(e > (v-1)*(v-2)*0.5) {
