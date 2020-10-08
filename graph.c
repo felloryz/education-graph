@@ -16,6 +16,7 @@ void push(node_t** head, int vertice1, int vertice2) {
     (*head) = tmp;
 }
 
+/* ЗАПИСЬ СВЯЗЕЙ В ФАЙЛ */
 void print_to_file(node_t* head, FILE* file) {
     fprintf(file, "graph graphname {\n");
     while(head != NULL) {
@@ -30,6 +31,7 @@ void print_to_file(node_t* head, FILE* file) {
     fprintf(file, "}");
 }
 
+/* ДОБАВЛЕНИЕ СВЯЗЕЙ МЕЖДУ ВЕРШИНАМИ */
 void add_edges(node_t** head) {
     while(1) {
         char c;
@@ -82,16 +84,64 @@ void add_edges(node_t** head) {
     }
 }
 
-int vertice_counter(node_t* head) {
-    int n = 0;
+/* ПРОВЕРКА НА ПЕТЕЛИ */
+int loops_counter(node_t* head) {
+    int l = 0;
     while(head != NULL) {
-        n++;
+        if(head->vertice1 == head->vertice2) l++;
         head = head->next;
     }
+    return l;
+}
+
+/* ПРОВЕРКА НА КРАТНЫЕ РЁБЕРА */
+int multiple_edges_counter(node_t* head) {
+    node_t* tmp = head;
+    int n = 0;
+    while (head != NULL) {
+        if(head->vertice2 != 0) n++;
+        head = head->next;
+    }
+    //printf("n = %d\n", n);
+    
+    int arr[2][n];
+    int i = 0;
+    while(tmp != NULL) {
+        arr[0][i] = tmp->vertice1;
+        arr[1][i] = tmp->vertice2;
+        i++;
+        tmp = tmp->next;
+    }
+
+    int m = 0;
+    for(int i = 0; i < n - 1; i++) {
+        for(int j = i + 1; j < n; j++) {
+            if ((arr[0][i] == arr[0][j]) && (arr[1][i] == arr[1][j])) {
+                m++;
+            } else if((arr[0][i] == arr[1][j]) && (arr[1][i] == arr[0][j])) {
+                m++;
+            }
+            
+        }
+    }
+    return m;
+}
+
+/* СЧЁТЧИК РЁБЕР */
+int edge_counter(node_t* head) {
+    int n = 0;
+    while(head != NULL) {
+        if(head->vertice2 != 0) {
+            n++;
+        }
+        head = head->next;
+    }
+    //printf("rebra = %d\n", n);
     return n;
 }
 
-int edge_counter(node_t* head) {
+/* СЧЁТЧИК ВЕРШИН */
+int vertice_counter(node_t* head) {
     int n = 0;
     node_t* tmp = head;
     while(head != NULL) {
@@ -126,18 +176,23 @@ int edge_counter(node_t* head) {
 
     int k = 0;
     for(int i = 0; i < n*2; i++) {
-        if(arr[i] != -1) k++;
+        if(arr[i] != -1 && arr[i] != 0) k++;
     }
     //printf("\n");
-    //printf("%d", k);
+    //printf("vershiny = %d\n", k);
 
     return k;
 }
 
-int connectivity_check(int e, int v) {
-    if(v > (e-1)*(e-2)*0.5) {
+/* ПРОВЕРКА НА СВЯЗНОСТЬ */
+int connectivity_check(int v, int e, node_t* head) {
+    
+    if(loops_counter(head) || multiple_edges_counter(head) != 0) {
+        return -2;
+    } else if(e > (v-1)*(v-2)*0.5) {
         return 1;
-    } else return -1;
+    } else 
+        return -1;
 }
 
 int main(void)
@@ -147,12 +202,14 @@ int main(void)
     FILE *file;
     file = fopen("graph.dot", "w");
     if (file == NULL) {
-        printf("Error opening file");
+        printf("Error opening file\n");
         return -1;
     }
 
     printf("GRAPH var1 - Feodor Ryzhov IU4-32b\n");
-    printf("Enter edges (example 1-2) (enter -1 to exit)\n");
+    printf("You can enter edges like 1-2\n");
+    printf("If you want isolated vertice of a graph enter like 5-\n");
+    printf("To stop the programm enter -1\n");
 
     add_edges(&head);
 
@@ -160,10 +217,17 @@ int main(void)
 
     fclose(file);
 
-    if (connectivity_check(edge_counter(head), vertice_counter(head)) == 1)
-        printf("OK");
+    printf("\nEdges = %d\n", edge_counter(head));
+    printf("Vertices = %d\n", vertice_counter(head));
+    printf("Loops = %d\n", loops_counter(head));
+    printf("Multiple edges = %d\n\n", multiple_edges_counter(head));
+
+    if (connectivity_check(vertice_counter(head), edge_counter(head), head) == 1)
+        printf("This is a connected graph\n");
+    else if(connectivity_check(vertice_counter(head), edge_counter(head), head) == -1)
+        printf("This is a DISconnected graph\n");
     else
-        printf("not OK");
+        printf("This is not a simple graph!\n");
 
     system("dot -Tpng graph.dot -o graph.png");
     system("graph.png");
